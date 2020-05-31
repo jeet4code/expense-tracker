@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #expenses {
+            display: flex;
+            flex-direction: column;
+            width: 200px;;
+        }
+
+        #expenses > div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="expenses" ></div>
+    <form onsubmit="saveExpenses(event)" >
+        <div>
+            <div>
+                <label for="description">Description</label><input name="description" id="description" type="text" />
+            </div>
+            <div>
+                <label for="amount">Amount</label><input name="amount" id="amount" type="text" />
+            </div>
+        </div>
+        <button type="submit">Add</button>
+    </form>
+    <script>
+        function saveExpenses(event) {
+            event.preventDefault();
+            const description = document.querySelector("#description").value;
+            const amount = document.querySelector("#amount").value;
+            const body = JSON.stringify([{description, amount}]);
+            fetch("/expenses", {
+                method: 'POST', 
+                body,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then(data => {
+                console.log(data);
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        fetch("/expenses", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(async data => {
+            const expenses = await data.json(); 
+            console.log(expenses);
+            if(expenses.length) {
+                renderExpenses(expenses);
+            }
+        }).catch(error => {
+            console.log(error);
+        });
+
+        function createElement(text) {
+            const element = document.createElement('div')
+            element.innerText = text;
+            return element
+        }
+
+        function createRow({description, amount}) {
+            const element = document.createElement('div')
+            element.append(createElement(description));
+            element.append(createElement(amount));
+            return element;
+        }
+
+        function renderExpenses(expenses) {
+            const expensesWrapper = document.querySelector("#expenses");
+
+            expenses.forEach(element => {
+                expensesWrapper.append(createRow(element))
+                
+            });
+
+        }
+
+    </script>
+</body>
+</html>
